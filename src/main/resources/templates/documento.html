@@ -50,7 +50,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-2" >
-                    
+
                 </div>
                 <div class="col-8" style="background-color: #43637C">
                     <br>
@@ -80,8 +80,15 @@
                         </div>
                     </div>
                     <br>
-                    <h5 class="Autor">Autor: </h5><p class="Autor" th:text="${objdocumento.autor}"></p>
-
+                    <h5 class="Autor">Autor Principal: </h5><p class="Autor" th:text="${objdocumento.primerAutor.nombreAutor}"></p>
+                    <ul class="list-group list-group-light">
+                        <h5 class="Autor">Autor Secundarios: </h5>
+                        <th:block th:each="autor : ${listaautoresx}">
+                            <li class="list-group-item">
+                                <span th:text="${autor.nombreAutor}"></span>
+                            </li>
+                        </th:block>
+                    </ul>
                     <br>
                     <br>
                     <p class="text-center" th:text="${objdocumento.descripcion}"></p>

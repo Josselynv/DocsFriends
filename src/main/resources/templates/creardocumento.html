@@ -6,6 +6,21 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script><!-- comment -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js" integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa" crossorigin="anonymous"></script>
+<!-- Font Awesome -->
+<link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"
+    />
+<!-- Google Fonts -->
+<link
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    rel="stylesheet"
+    />
+<!-- MDB -->
+<link
+    href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css"
+    rel="stylesheet"
+    />
 </head>
 <body>
     <h4 style="color:white; margin-left:10px">Subir documento</h4>
@@ -18,9 +33,49 @@
                     <input required="true" type="text" maxlength="30" class="form-control" id="exampleFormControlInput1" placeholder="Titulo de documento" th:field="*{titulo}">
                 </div>
                 <div class="mb-3">
-                    <label style="color:#FFC107">Autor:  </label>
-                    <input required="true" type="text" maxlength="30" class="form-control" id="exampleFormControlInput1" placeholder="Autor de documento" th:field="*{autor}">
+                    <label style="color:#FFC107">Autor Principal:  </label>
+                    <select name="idPrincipal">
+                        <option disabled th:text="Autor" selected="Autor"></option>
+                        <option th:each="tipox : ${Listaautores}" th:value="${tipox.idAutor}" th:text="${tipox.nombreAutor}"></option>
+                    </select>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#nuevoAutorModal" class="btn btn-outline-primary" style="width: 40%">NUEVO AUTOR</button>
                 </div>
+
+                <!-- Botón para abrir la ventana modal -->
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#autoresModal">
+                    Seleccionar Autores Secundarios
+                </button>
+                <div class="modal fade" id="autoresModal" tabindex="-1" aria-labelledby="autoresModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="autoresModalLabel">Seleccionar Autores Secundarios</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="autoresCheckboxList">
+                                    <div class="mb-3">
+                                        <label style="color:#FFC107">Autores Secundarios:</label>
+                                        <ul class="list-group list-group-light">
+                                            <th:block th:each="autor : ${Listaautores}">
+                                                <li class="list-group-item">
+                                                    <input name="autoresSecundarios" class="form-check-input me-1" type="checkbox" th:value="${autor.idAutor}" aria-label="..." />
+                                                    <span th:text="${autor.nombreAutor}"></span>
+                                                </li>
+                                            </th:block>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Guardar Autores</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="mb-3">
                     <div class="input-group mb-3">
                         <span class="input-group-text">Sispnosis:</span>
@@ -37,10 +92,10 @@
         <div class="mb-3" style="margin: 2%;">
             <label style="color:#FFC107">Adjuntar archivo del documento:</label><br/><br/>
             <label class="img p">
-                
+
                 <label for="arch1">
                     <img class="ptp" th:src="@{/images/subir-archivo.png}" alt="Subir archivo" style="width: 60px;">
-                        <input type="file" id="arch1" name="arch1" accept=".pdf" >
+                    <input type="file" id="arch1" name="arch1" accept=".pdf" >
                     </img>
                 </label>
 
@@ -71,6 +126,26 @@
         </div>
     </form>
 
+    <div class="modal fade" id="nuevoAutorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Agregar Nuevo Autor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/docsfriends/agregarautor}" method="post">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre del Autor:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required="required" >
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar Autor</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 <style>
@@ -100,4 +175,9 @@
         width: 100%;
     }
 </style>
+<!-- MDB -->
+<script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"
+></script>
 </html>

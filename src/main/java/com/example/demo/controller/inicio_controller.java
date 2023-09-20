@@ -10,6 +10,7 @@ import com.example.demo.Datos.Usuario;
 import com.example.demo.services.Documento_service;
 import com.example.demo.services.Solicitud_Service;
 import com.example.demo.services.Tipo_Documento_service;
+import com.example.demo.services.autor_service;
 import com.example.demo.services.ciudad_service;
 import com.example.demo.services.usuario_service;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/docsfriends")
 public class inicio_controller {
 
+    @Autowired
+    private autor_service au;
+    
     @Autowired
     private usuario_service ps;
     @Autowired
@@ -123,6 +127,7 @@ public class inicio_controller {
         if (mo.getAttribute("objdocumento") == null) {
             mo.addAttribute("objdocumento", new Documento());
         }
+        mo.addAttribute("Listaautores", au.listar());
         return "creardocumento";
     }
 

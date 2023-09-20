@@ -4,9 +4,14 @@
  */
 package com.example.demo.controller;
 
+import com.example.demo.Datos.Autores;
+import com.example.demo.Datos.Detalle_documento;
 import com.example.demo.Datos.Documento;
 import com.example.demo.Datos.Solicitud;
 import com.example.demo.Datos.Usuario;
+import com.example.demo.repositories.Detalledocumento_interface;
+import com.example.demo.repositories.autor_interface;
+import com.example.demo.services.Detalledocumento_service;
 import com.example.demo.services.Documento_service;
 import com.example.demo.services.Solicitud_Service;
 import com.example.demo.services.usuario_service;
@@ -28,6 +33,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +48,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class documento_controller {
 
     @Autowired
+    private autor_interface autor_inter;
+    
+    @Autowired
+    private Detalledocumento_service x;
+            
+    @Autowired
     private Documento_service ds;
     @Autowired
     private usuario_service us;
@@ -49,6 +61,16 @@ public class documento_controller {
     private Solicitud_Service solise;
     @Autowired
     private usuario_service ps;
+    
+
+    @PostMapping("/agregarautor")
+    public String agregarAutor(@RequestParam("nombre") String nombreAutor) {
+        Autores nuevoAutor = new Autores();
+        nuevoAutor.setNombreAutor(nombreAutor);
+        autor_inter.save(nuevoAutor);
+        return "redirect:/docsfriends/home"; 
+    }
+    
 
     @PostMapping("/savedoc")
     public String login(@ModelAttribute(name = "objdocumento") Documento doc, HttpSession session,
@@ -59,6 +81,8 @@ public class documento_controller {
             @RequestParam(name = "file5", required = false) MultipartFile archivo5,
             @RequestParam(name = "file6", required = false) MultipartFile archivo6,
             @RequestParam(name = "arch1", required = false) MultipartFile pdf,
+            @RequestParam(name = "autoresSecundarios", required = false) List<Long> autoresSecund,
+            @RequestParam(name = "idPrincipal", required = false) Long autorPrin,
             RedirectAttributes flash) {
 
         Long userId = (Long) session.getAttribute("usuario");
@@ -79,7 +103,7 @@ public class documento_controller {
         archivos.add(archivo6);
         doc.setRuta6(archivo6.getOriginalFilename());
 
-        try {
+        
             for (MultipartFile archivo : archivos) {
                 if (archivo != null && !archivo.isEmpty()) {
                     String ruta_gen = "src/main/resources/static/images/";
@@ -97,15 +121,25 @@ public class documento_controller {
                 doc.setPdf(pdf.getOriginalFilename());
                 // Guardar información del archivo en la base de datos si es necesario
             }
+            doc.setPrimerAutor(autor_inter.findByidAutor(autorPrin));
             ds.save(doc);
             session.setAttribute("mensajenoti", "Se creó el documento:'" + doc.getTitulo() + "' correctamente");
+            
+            if(autoresSecund != null){
+                for(long autoresse: autoresSecund)
+                    {
+                        Detalle_documento detalledoc= new Detalle_documento();
+                        detalledoc.setIdDocumento(doc);
+                        detalledoc.setNombreAutor(autor_inter.findByidAutor(autoresse));
+                        x.save(detalledoc);
+                    }
+            }
 
-        } catch (Exception e) {
-            session.setAttribute("mensajenoti", "No se pudo crear el documento:'" + doc.getTitulo() + "'");
-
-        }
+        
         return "redirect:/docsfriends/home";
-    }
+        }
+    
+    
 
     @PostMapping("/editardoc")
     public String editar(Model mo, @ModelAttribute(name = "objdocumento") Documento doc, HttpSession session,
@@ -217,6 +251,7 @@ public class documento_controller {
     @GetMapping("/documento")
     public String a(Model mo, @RequestParam(value = "docID", required = true) Long docID) {
         mo.addAttribute("objdocumento", ds.buscar(docID));
+        mo.addAttribute("listaautoresx", autor_inter.findAutoresByDocumentoId(ds.buscar(docID).getIdDocumento()));
         return "documento";
     }
 }
